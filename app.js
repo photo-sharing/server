@@ -6,9 +6,7 @@ const app = express()
 
 const port = process.env.PORT || '3000'
 
-const weatherRouter = require('./routes/weatherRouter')
-const adminRouter = require('./routes/admin')
-
+const GCSRouter = require('./routes/gcsRoute')
 
 app.use(cors())
 app.use(express.json());
@@ -21,9 +19,8 @@ db.once('open', function() {
   console.log('DB Connected!');
 });
 
-app.use('/weather', weatherRouter) 
-app.use('/admin', adminRouter)
- 
+app.use('/gcs', GCSRouter)
+
 app.listen(port, () => {
   console.log(`Running on port ${port}`)
 })
