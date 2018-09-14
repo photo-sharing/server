@@ -1,31 +1,70 @@
 const GSC = require('../models/Photo')
 const GCSUploader = require('../helpers/GCSUploader')
+const api=require('../helpers/get _face-tags.js')
 
 class GCSController {
+  
+    static getEmotion(req, imgUrl) {
+      return new Promise((resolve, reject) => {
+        api.get_face_properties(imgUrl)
+        .then(response => {
+            let emotions = JSON.parse(response)[0].faceAttributes.emotion
+            let temp = []
+            let sortedEmotions = []
+
+            for(let emotion in emotions) {
+                temp.push([emotion, emotions[emotion]])
+            }
+            
+            resolve(req.emotion = temp.sort(function(a, b){return b[1]-a[1]})[0])
+        })
+        .catch(error => {
+            reject(error)
+        })
+      })
+    }
+    
+    static getTags(req, imgUrl) {
+      return new Promise((resolve, reject) => {
+        api.get_tags(imgUrl)
+        .then(response => {
+            resolve(req.tags = JSON.parse(response).description.tags)
+        })
+        .catch(error => {
+            reject(error) 
+        })
+      })
+    }
 
     static updloadImage(req, res) {
-
-        let obj = {
-            url : req.file.cloudStoragePublicUrl,
-            description : req.body.description,
-            tags : []
-        }
-
-        let gsc = new GSC(obj)
-
-        gsc.save()
-        .then(data => {
-            res.status(201).json({
-                success : true,
-                data : data
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                success : false,
-                message : err.message
-            })
-        })
+        Promise.all([GCSController.getEmotion(req, req.file.cloudStoragePublicUrl), GCSController.getTags(req, req.file.cloudStoragePublicUrl)])
+          .then(() => {
+              let obj = {
+                  url : req.file.cloudStoragePublicUrl,
+                  description : req.body.description,
+                  tags : req.tags,
+                  emotion : req.emotion[0]
+              }
+              
+              let gsc = new GSC(obj)
+              
+              gsc.save()
+              .then(data => {
+                  res.status(201).json({
+                      success : true,
+                      data : data
+                  })
+              })
+              .catch(err => {
+                  res.status(500).json({
+                      success : false,
+                      message : err.message
+                  })
+              })
+          })
+          .catch(err => {
+            res.status(500).json({error: err.message})
+          })
     }
 
     static delete(req,res) {

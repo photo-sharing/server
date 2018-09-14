@@ -1,7 +1,7 @@
 const api=require('../helpers/get _face-tags.js')
 
-function get_face(req,res,next){
-    api.get_face_properties(req.file.cloudStoragePublicUrl)
+function get_face(imgUrl){
+    api.get_face_properties(imgUrl)
     .then(response => {
         let emotions = JSON.parse(response)[0].faceAttributes.emotion
         let temp = []
@@ -10,23 +10,20 @@ function get_face(req,res,next){
         for(let emotion in emotions) {
             temp.push([emotion, emotions[emotion]])
         }
-
-        req.emotion=temp.sort(function(a, b){return b[1]-a[1]})[0]
-        next()
+        return temp.sort(function(a, b){return b[1]-a[1]})[0]
     })
     .catch(error => {
         return error
     })
 }
 
-function get_tags(req,res,next){
-    api.get_tags('http://pngimg.com/uploads/face/face_PNG5660.png')
+function get_tags(imgUrl){
+    api.get_tags(imgUrl)
     .then(response => {
-        req_tags=JSON.parse(response).description.tags
-        // next(data)
+        return JSON.parse(response).description.tags
     })
     .catch(error => {
-        return err  
+        return error  
     })
 }
 

@@ -1,4 +1,5 @@
 const Admin = require('../models/Admin')
+const Photo = require('../models/Photo')
 const encrypt = require('../helpers/encrypt')
 const jwt = require('jsonwebtoken')
 
@@ -23,6 +24,26 @@ class Controller {
       })
       .catch(err => {
         res.status(500).json({error: err.message})
+      })
+  }
+  
+  static unReport(req, res) {
+    Photo.updateOne({_id: req.params.id}, {reported: 0})
+      .then(() => {
+        res.status(201).json({message: 'Photo back to live!'})
+      })
+      .catch(err => {
+        res.status(500).json({error: err.message})
+      })
+  }
+  
+  static getReported(req, res) {
+    Photo.find({reported: 1})
+      .then(photos => {
+        res.status(200).json(photos)
+      })
+      .catch(err => {
+        req.status(500).json({error: err.message})
       })
   }
   
