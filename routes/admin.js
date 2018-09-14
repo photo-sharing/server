@@ -10,4 +10,8 @@ router.get('/', (req, res) => {
 
 router.post('/login', adminController.login)
 
+router.get('/reported', auth, adminController.getReported)
+
+router.put('/unreport/:id', auth, adminController.unReport)
+
 module.exports = router

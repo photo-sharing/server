@@ -10,7 +10,8 @@ const photoSchema = new mongoose.Schema({
         type : Number,
         default : 0
     },
-    tags: []
+    tags: [],
+    emotion: ''
 }, {
     timestamps: true
 })
